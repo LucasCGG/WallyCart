@@ -1,0 +1,6 @@
+@WallyCart_HostAddress = http://localhost:5207
+
+GET {{WallyCart_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
