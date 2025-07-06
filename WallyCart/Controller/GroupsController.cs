@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using WallyCart.Models;
 using WallyCart.Dtos.Groups;
 using WallyCart.Dtos.Users;
 using WallyCart.Enums;

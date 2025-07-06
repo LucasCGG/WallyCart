@@ -8,6 +8,8 @@ builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GroupService>();
+builder.Services.AddScoped<ListService>();
+builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>

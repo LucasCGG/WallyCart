@@ -11,6 +11,8 @@ public partial class Product
 
     public string Source { get; set; } = null!;
 
+    public string? Barcode { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<ListItem> ListItems { get; set; } = new List<ListItem>();
