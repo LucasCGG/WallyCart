@@ -11,6 +11,8 @@ builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<ListService>();
 builder.Services.AddScoped<ProductService>();
 
+builder.Services.AddHttpClient<WhatsAppService>();
+
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
 {
