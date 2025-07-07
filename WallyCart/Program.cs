@@ -1,6 +1,7 @@
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using WallyCart.Models;
+using WallyCart.Session;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,10 @@ builder.Services.AddScoped<ListService>();
 builder.Services.AddScoped<ProductService>();
 
 builder.Services.AddHttpClient<WhatsAppService>();
+
+builder.Services.AddSingleton<SessionManager>();
+builder.Services.AddSingleton(new CommandLanguageService("en"));
+builder.Services.AddSingleton<CommandRouter>();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>

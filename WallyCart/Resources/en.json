@@ -1,0 +1,25 @@
+{
+  "commands": {
+    "help": {
+      "keywords":["help"],
+      "prompts":{
+        "instruction": "How can we help?"
+      }
+    },
+    "create_group": {
+      "keywords": ["create group", "new group", "add group"],
+      "prompts": {
+        "ask_name": "📝 What's the name of the group you'd like to create?",
+        "created": "✅ Group *{0}* created successfully!"
+      }
+    },
+    "add_item": {
+      "keywords": ["add item", "new item"],
+      "prompts": {
+        "ask_product": "📦 What item would you like to add?",
+        "ask_quantity": "🔢 How many?",
+        "added": "✅ Added {0} x *{1}* to your list."
+      }
+    }
+  }
+}
