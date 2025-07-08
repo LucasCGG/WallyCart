@@ -34,6 +34,7 @@ public partial class WallyCartDbContext : DbContext
             var config = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true)
+                .AddJsonFile("resources/en.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables()
                 .Build();
 

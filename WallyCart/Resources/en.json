@@ -1,8 +1,8 @@
 {
   "commands": {
     "help": {
-      "keywords":["help"],
-      "prompts":{
+      "keywords": ["help"],
+      "prompts": {
         "instruction": "How can we help?"
       }
     },

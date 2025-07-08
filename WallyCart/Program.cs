@@ -2,8 +2,12 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
 using WallyCart.Models;
 using WallyCart.Session;
+using WallyCart.Session.Handler;
+using System.Windows.Input;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("Resources/en.json", optional: false, reloadOnChange: true);
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -12,11 +16,16 @@ builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<ListService>();
 builder.Services.AddScoped<ProductService>();
 
+builder.Services.AddScoped<ICommandHandler, HelpCommandHandler>();
+builder.Services.AddScoped<ICommandHandler, CreateGroupCommandHandler>();
+builder.Services.AddScoped<CommandRouter>();
+
 builder.Services.AddHttpClient<WhatsAppService>();
 
 builder.Services.AddSingleton<SessionManager>();
-builder.Services.AddSingleton(new CommandLanguageService("en"));
-builder.Services.AddSingleton<CommandRouter>();
+builder.Services.AddSingleton(_ => new CommandLanguageService("en"));
+
+builder.Services.AddHostedService<SessionCleanupService>();
 
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
@@ -39,5 +48,12 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 app.MapControllers(); 
+
+var commands = builder.Configuration.GetSection("commands").GetChildren();
+Console.WriteLine("Commands loaded:");
+foreach (var cmd in commands)
+{
+    Console.WriteLine($" - {cmd.Key}");
+}
 
 app.Run();

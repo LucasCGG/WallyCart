@@ -28,13 +28,36 @@ public class GroupsController : ControllerBase
                 CreatedAt = group.CreatedAt
             };
 
-            return Ok(result); // ✅ Returns DTO, not EF entity
+            return Ok(result);
         }
         catch (Exception ex)
         {
             return StatusCode(500, ex.Message);
         }
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var groups = await _groupService.GetAllGroupsAsync();
+
+            var result = groups.Select(g => new GroupDto
+            {
+                Id = g.Id,
+                GroupName = g.GroupName,
+                CreatedAt = g.CreatedAt
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
 
     [HttpGet("user/{userId:guid}")]
     public async Task<IActionResult> GetUserGroups(Guid userId)

@@ -57,6 +57,11 @@ public class GroupService
             .ToListAsync();
     }
 
+    public async Task<List<Group>> GetAllGroupsAsync()
+    {
+        return await _context.Groups.ToListAsync();
+    }
+
     public async Task<List<User>> GetUsersInGroupAsync(Guid groupId)
     {
         return await _context.GroupUsers

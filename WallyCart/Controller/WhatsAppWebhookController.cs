@@ -51,49 +51,64 @@ public class WhatsAppWebhookController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> ReceiveMessage([FromBody] JsonElement body)
     {
+        await ProcessWebhookAsync(body);
+        return Ok("EVENT_RECEIVED");
+    }
+
+    private async Task ProcessWebhookAsync(JsonElement body)
+    {
         try
         {
-            var entry = body.GetProperty("entry")[0];
-            var changes = entry.GetProperty("changes")[0];
-            var value = changes.GetProperty("value");
+            _logger.LogDebug("Webhook body: {Body}", body);
 
-            var messages = value.GetProperty("messages");
-            if (messages.ValueKind == JsonValueKind.Array && messages.GetArrayLength() > 0)
+            if (!body.TryGetProperty("entry", out var entries)) return;
+
+            foreach (var entry in entries.EnumerateArray())
             {
-                var msg = messages[0];
-                var text = msg.GetProperty("text").GetProperty("body").GetString();
-                var from = msg.GetProperty("from").GetString();
+                if (!entry.TryGetProperty("changes", out var changes)) continue;
 
-                Console.WriteLine($"💬 Received from {from}: {text}");
-
-                if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(text))
+                foreach (var change in changes.EnumerateArray())
                 {
-                    var user = await _userService.GetUserByPhoneAsync(from);
-                    if (user == null)
+                    if (!change.TryGetProperty("value", out var value)) continue;
+                    if (!value.TryGetProperty("messages", out var messages)) continue;
+
+                    foreach (var msg in messages.EnumerateArray())
                     {
-                        return StatusCode(400, "No user found with this number");
+                        if (!msg.TryGetProperty("from", out var fromProp) ||
+                            !msg.TryGetProperty("text", out var textObj) ||
+                            !textObj.TryGetProperty("body", out var bodyProp))
+                        {
+                            _logger.LogWarning("Unsupported or incomplete message format.");
+                            continue;
+                        }
+
+                        var from = fromProp.GetString();
+                        var text = bodyProp.GetString();
+
+                        if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(text))
+                            continue;
+
+                        var user = await _userService.GetUserByPhoneAsync(from);
+                        if (user is null)
+                        {
+                            await _whatsAppService.SendWhatsAppMessageAsync(
+                                from, "⚠️ Sorry, this number is not registered with us.");
+                            continue;
+                        }
+
+                        var session = _sessionManager.GetOrCreate(user.Id);
+                        var response = await _commandRouter.HandleCommandAsync(session, text)
+                                    ?? "⚠️ No response from handler.";
+
+                        await _whatsAppService.SendWhatsAppMessageAsync(from, response);
                     }
-
-                    var session = _sessionManager.GetOrCreate(user.Id);
-                    var responseMessage = await _commandRouter.HandleCommandAsync(session, text);
-
-                    await _whatsAppService.SendWhatsAppMessageAsync(from, responseMessage ?? "⚠️ No response from handler.");
-
                 }
-                else
-                {
-                    _logger.LogWarning("Received message with null 'from' or 'text'");
-                }
-
-                return Ok();
             }
-
-            return BadRequest("No message found in payload.");
         }
         catch (Exception ex)
         {
-            _logger.LogError("❌ Error parsing WhatsApp message: {Message}", ex.Message);
-            return StatusCode(500, ex.Message);
+            _logger.LogError(ex, "Error while processing webhook");
         }
     }
+
 }

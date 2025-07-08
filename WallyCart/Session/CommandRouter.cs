@@ -35,8 +35,23 @@ public class CommandRouter
     {
         if (string.IsNullOrWhiteSpace(session.CurrentCommand))
         {
+            Console.WriteLine("Message received: " + message);
+            Console.WriteLine("Available keywords:");
+            foreach (var kv in _keywordToCommandKey)
+            {
+                Console.WriteLine($" - {kv.Key} => {kv.Value}");
+            }
+
             var matched = _keywordToCommandKey
-                .FirstOrDefault(kv => message.StartsWith(kv.Key, StringComparison.OrdinalIgnoreCase));
+                    .FirstOrDefault(kv =>
+                {
+                Console.WriteLine("Comparing with keyword: " + kv.Key);
+                Console.WriteLine("Matched?: " + message.StartsWith(kv.Key, StringComparison.OrdinalIgnoreCase));
+                return message.Contains(kv.Key, StringComparison.OrdinalIgnoreCase);
+                }
+            );
+
+
 
             if (string.IsNullOrEmpty(matched.Key)) return "Unknown command. Type *help* to see options.";
 
